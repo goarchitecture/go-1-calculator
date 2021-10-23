@@ -2,41 +2,36 @@ package main
 
 import (
 	"fmt"
-	"os"
+	"github.com/goarchitecture/go-simple-calculator/calculator"
 )
 
 func main() {
 	fmt.Println("Hello calculator")
 
-	fmt.Println("Enter 2 operands")
-	var x, y float64
-	if _, err := fmt.Scanf("%f %f", &x, &y); err != nil {
-		fmt.Printf("invalid operands: %s\n", err)
-		os.Exit(1)
+	calc := calculator.NewCalculator()
+	if err := calc.ReadInput(); err != nil {
+		fmt.Printf("input failure: %s\n", err)
+		return
 	}
 
-	fmt.Println("Enter operation")
-	var op string
-	if _, err := fmt.Scan(&op); err != nil {
-		fmt.Printf("invalid operation: %s\n", err)
-		os.Exit(1)
+	result, err := calc.Do()
+	if err != nil {
+		fmt.Printf("calc failed: %s\n", err)
+		return
 	}
 
-	var result float64
-	switch op {
-	case "+":
-		result = x + y
-	case "-":
-		result = x - y
-	case "/":
-		if y == 0 {
-			fmt.Println("can not divide by zero")
-			os.Exit(1)
-		}
-		result = x / y
-	case "*":
-		result = x * y
+	if err := Output(result); err != nil {
+		fmt.Printf("could not output: %s\n", err)
+		return
 	}
 
-	fmt.Printf("Result = %.2f\n", result)
+	fmt.Println("good bye")
+}
+
+func Output(result float64) error {
+	if _, err := fmt.Printf("Result = %.2f\n", result); err != nil {
+		return fmt.Errorf("could not printf result: %w", err)
+	}
+
+	return nil
 }
