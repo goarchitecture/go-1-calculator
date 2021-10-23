@@ -3,12 +3,15 @@ package main
 import (
 	"fmt"
 	"github.com/goarchitecture/go-simple-calculator/calculator"
+	sci_operations "github.com/goarchitecture/go-simple-calculator/sci-ops"
 )
 
 func main() {
 	fmt.Println("Hello calculator")
 
-	calc := calculator.NewCalculator()
+	calc := calculator.NewStandardCalculator()
+	calc.AppendOperation(sci_operations.NewSin())
+
 	if err := calc.ReadInput(); err != nil {
 		fmt.Printf("input failure: %s\n", err)
 		return

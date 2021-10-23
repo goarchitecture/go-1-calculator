@@ -2,16 +2,31 @@ package calculator
 
 import (
 	"fmt"
+	"github.com/goarchitecture/go-simple-calculator/calculator/operations"
 	"strconv"
 )
 
 type Calculator struct {
 	x, y float64
 	op   string
+
+	operations []operations.Operation
 }
 
-func NewCalculator() *Calculator {
-	return &Calculator{}
+func NewCalculator(op ...operations.Operation) *Calculator {
+	return &Calculator{operations: op}
+}
+
+func NewStandardCalculator() *Calculator {
+	return NewCalculator(
+		operations.NewPlus(), operations.NewMinus(),
+		operations.NewMultiply(), operations.NewSqrt(), operations.NewDivide(),
+	)
+}
+
+func (c *Calculator) AppendOperation(op operations.Operation) *Calculator {
+	c.operations = append(c.operations, op)
+	return c
 }
 
 func (c *Calculator) ReadInput() (err error) {
@@ -37,23 +52,12 @@ func (c *Calculator) ReadInput() (err error) {
 }
 
 func (c *Calculator) Do() (result float64, err error) {
-	switch c.op {
-	case "+":
-		result = c.x + c.y
-	case "-":
-		result = c.x - c.y
-	case "/":
-		if c.y == 0 {
-			err = fmt.Errorf("can no divide by zero")
-			return
+	for _, op := range c.operations {
+		if op.Match(c.op) {
+			return op.Setup(c.x, c.y).Do()
 		}
-		result = c.x / c.y
-	case "*":
-		result = c.x * c.y
-	default:
-		err = fmt.Errorf("unsupported operation")
-		return
 	}
 
+	err = fmt.Errorf("operation is not supported")
 	return
 }

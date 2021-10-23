@@ -12,7 +12,7 @@ func TestNewCalculator(t *testing.T) {
 }
 
 func TestCalculator_DoValid(t *testing.T) {
-	calc := NewCalculator()
+	calc := NewStandardCalculator()
 
 	type ValidExample struct {
 		x, y     float64
@@ -44,7 +44,7 @@ func TestCalculator_DoValid(t *testing.T) {
 }
 
 func TestCalculator_DoInvalid(t *testing.T) {
-	calc := NewCalculator()
+	calc := NewStandardCalculator()
 
 	type InvalidExample struct {
 		x, y float64
