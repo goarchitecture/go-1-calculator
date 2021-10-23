@@ -1,6 +1,9 @@
 package calculator
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 type Calculator struct {
 	x, y float64
@@ -12,15 +15,21 @@ func NewCalculator() *Calculator {
 }
 
 func (c *Calculator) ReadInput() (err error) {
-	fmt.Println("Enter 2 operands")
-	if _, err = fmt.Scanf("%f %f", &c.x, &c.y); err != nil {
-		err = fmt.Errorf("could not parse operands: %w", err)
+	fmt.Println("Enter expression (a * b): ")
+
+	var xStr, yStr string
+	if _, err = fmt.Scanf("%s %s %s", &xStr, &c.op, &yStr); err != nil {
+		err = fmt.Errorf("не верный формат ввода")
 		return
 	}
 
-	fmt.Println("Enter operation")
-	if _, err = fmt.Scan(&c.op); err != nil {
-		err = fmt.Errorf("could not parse operator: %w", err)
+	if c.x, err = strconv.ParseFloat(xStr, 64); err != nil {
+		err = fmt.Errorf("first operand is not a number")
+		return
+	}
+
+	if c.y, err = strconv.ParseFloat(yStr, 64); err != nil {
+		err = fmt.Errorf("second operand is not a number")
 		return
 	}
 
