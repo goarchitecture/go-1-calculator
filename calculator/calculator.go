@@ -3,7 +3,10 @@ package calculator
 import (
 	"fmt"
 	"github.com/goarchitecture/go-simple-calculator/calculator/operations"
+	"io"
+	"os"
 	"strconv"
+	"strings"
 )
 
 type Calculator struct {
@@ -24,16 +27,20 @@ func NewStandardCalculator() *Calculator {
 	)
 }
 
-func (c *Calculator) AppendOperation(op operations.Operation) *Calculator {
-	c.operations = append(c.operations, op)
+func (c *Calculator) AppendOperation(op ...operations.Operation) *Calculator {
+	c.operations = append(c.operations, op...)
 	return c
 }
 
-func (c *Calculator) ReadInput() (err error) {
+func (c *Calculator) ReadInput(input string) (err error) {
 	fmt.Println("Enter expression (a * b): ")
 
+	var inputReader io.Reader = os.Stdin
+	if input != "" {
+		inputReader = strings.NewReader(input)
+	}
 	var xStr, yStr string
-	if _, err = fmt.Scanf("%s %s %s", &xStr, &c.op, &yStr); err != nil {
+	if _, err = fmt.Fscanf(inputReader, "%s %s %s", &xStr, &c.op, &yStr); err != nil {
 		err = fmt.Errorf("не верный формат ввода")
 		return
 	}
