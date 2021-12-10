@@ -2,69 +2,42 @@ package calculator
 
 import (
 	"fmt"
-	"github.com/goarchitecture/go-simple-calculator/calculator/operations"
-	"io"
-	"os"
-	"strconv"
-	"strings"
+	"gb/go-1-11/calculator/operations"
 )
 
 type Calculator struct {
-	x, y float64
-	op   string
-
 	operations []operations.Operation
 }
 
-func NewCalculator(op ...operations.Operation) *Calculator {
-	return &Calculator{operations: op}
+func NewBaseCalculator() *Calculator {
+	return &Calculator{operations: []operations.Operation{
+		operations.NewOperationPlus(),
+		operations.NewOperationMinus(),
+		operations.NewOperationMultiply(),
+		operations.NewOperationDivide(),
+		operations.NewOperationExit(),
+	}}
 }
 
-func NewStandardCalculator() *Calculator {
-	return NewCalculator(
-		operations.NewPlus(), operations.NewMinus(),
-		operations.NewMultiply(), operations.NewSqrt(), operations.NewDivide(),
-	)
-}
-
-func (c *Calculator) AppendOperation(op ...operations.Operation) *Calculator {
-	c.operations = append(c.operations, op...)
+func (c *Calculator) AppendOperation(ops ...operations.Operation) *Calculator {
+	c.operations = append(c.operations, ops...)
 	return c
 }
 
-func (c *Calculator) ReadInput(input string) (err error) {
-	fmt.Println("Enter expression (a * b): ")
-
-	var inputReader io.Reader = os.Stdin
-	if input != "" {
-		inputReader = strings.NewReader(input)
-	}
-	var xStr, yStr string
-	if _, err = fmt.Fscanf(inputReader, "%s %s %s", &xStr, &c.op, &yStr); err != nil {
-		err = fmt.Errorf("не верный формат ввода")
-		return
+func (c *Calculator) Calc() (float64, error) {
+	x, y, inputOperation, err := readInput()
+	if err != nil {
+		return 0, err
 	}
 
-	if c.x, err = strconv.ParseFloat(xStr, 64); err != nil {
-		err = fmt.Errorf("first operand is not a number")
-		return
-	}
-
-	if c.y, err = strconv.ParseFloat(yStr, 64); err != nil {
-		err = fmt.Errorf("second operand is not a number")
-		return
-	}
-
-	return
-}
-
-func (c *Calculator) Do() (result float64, err error) {
 	for _, op := range c.operations {
-		if op.Match(c.op) {
-			return op.Setup(c.x, c.y).Do()
+		if op.Match(inputOperation) {
+			if err := op.Init(x, y); err != nil {
+				return 0, fmt.Errorf("operation %s init failed: %w", inputOperation, err)
+			}
+			return op.Calc()
 		}
 	}
 
-	err = fmt.Errorf("operation is not supported")
-	return
+	return 0, fmt.Errorf("unsuported operation")
 }

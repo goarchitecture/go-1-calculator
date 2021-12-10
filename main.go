@@ -1,48 +1,53 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"github.com/goarchitecture/go-simple-calculator/calculator"
-	sci_operations "github.com/goarchitecture/go-simple-calculator/sci-ops"
-	"github.com/namsral/flag"
+	calc_extension "gb/go-1-11/calc-extension"
+	"gb/go-1-11/calculator"
+	"gb/go-1-11/calculator/operations"
+	"strings"
 )
 
-var isScientific = flag.Bool("sci", false, "is calculator scientific")
-var inline = flag.String("inline", "", "inline command")
+const (
+	ActionTry  = "try"
+	ActionExit = "exit"
+)
 
 func main() {
-	flag.Parse()
+	calc := calculator.NewBaseCalculator()
+	calc.AppendOperation(calc_extension.NewOperationSqrt())
 
-	fmt.Println("Hello calculator")
+	for {
+		result, err := calc.Calc()
+		if err != nil {
+			if errors.Is(err, operations.ErrExit) {
+				fmt.Println("bye")
+				return
+			}
 
-	calc := calculator.NewStandardCalculator()
-	if *isScientific {
-		calc.AppendOperation(sci_operations.All()...)
+			fmt.Println("calc err: ", err.Error())
+
+			var action string
+			fmt.Printf("to try again enter `%s` or `%s` for exit\n", ActionTry, ActionExit)
+			if _, err := fmt.Scan(&action); err != nil {
+				fmt.Printf("could not continue because of scan err: %s\n", err)
+				return
+			}
+			// Sanitizing
+			action = strings.TrimSpace(action)
+			action = strings.ToLower(action)
+
+			if action == ActionTry {
+				continue
+			} else if action == ActionExit {
+				fmt.Println("bye")
+				return
+			}
+
+			return
+		}
+
+		fmt.Println("Result = ", result)
 	}
-
-	if err := calc.ReadInput(*inline); err != nil {
-		fmt.Printf("input failure: %s\n", err)
-		return
-	}
-
-	result, err := calc.Do()
-	if err != nil {
-		fmt.Printf("calc failed: %s\n", err)
-		return
-	}
-
-	if err := Output(result); err != nil {
-		fmt.Printf("could not output: %s\n", err)
-		return
-	}
-
-	fmt.Println("good bye")
-}
-
-func Output(result float64) error {
-	if _, err := fmt.Printf("Result = %.2f\n", result); err != nil {
-		return fmt.Errorf("could not printf result: %w", err)
-	}
-
-	return nil
 }

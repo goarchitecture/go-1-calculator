@@ -1,25 +1,31 @@
 package operations
 
-type Multiply struct {
+import "fmt"
+
+const OperationTypeMultiply OperationType = "*"
+
+type OperationMultiply struct {
 	x, y float64
 }
 
-func NewMultiply() *Multiply {
-	return &Multiply{}
+func NewOperationMultiply() *OperationMultiply {
+	return &OperationMultiply{}
 }
 
-const OperationMultiply = "*"
-
-func (op *Multiply) Setup(operands ...float64) Operation {
-	// todo: validate
-	op.x, op.y = operands[0], operands[1]
-	return op
+func (o *OperationMultiply) Calc() (float64, error) {
+	return o.x * o.y, nil
 }
 
-func (op *Multiply) Match(userOperation string) bool {
-	return userOperation == OperationMultiply
+func (o *OperationMultiply) Match(opType OperationType) bool {
+	return opType == OperationTypeMultiply
 }
 
-func (op *Multiply) Do() (float64, error) {
-	return op.x * op.y, nil
+func (o *OperationMultiply) Init(arguments ...float64) error {
+	if len(arguments) != 2 {
+		return fmt.Errorf("OperationMultiply requires 2 arguments")
+	}
+
+	o.x = arguments[0]
+	o.y = arguments[1]
+	return nil
 }

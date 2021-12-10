@@ -1,25 +1,31 @@
 package operations
 
-type Minus struct {
+import "fmt"
+
+const OperationTypeMinus OperationType = "-"
+
+type OperationMinus struct {
 	x, y float64
 }
 
-func NewMinus() *Minus {
-	return &Minus{}
+func NewOperationMinus() *OperationMinus {
+	return &OperationMinus{}
 }
 
-const OperationMinus = "-"
-
-func (op *Minus) Setup(operands ...float64) Operation {
-	// todo: validate
-	op.x, op.y = operands[0], operands[1]
-	return op
+func (o *OperationMinus) Calc() (float64, error) {
+	return o.x - o.y, nil
 }
 
-func (op *Minus) Match(userOperation string) bool {
-	return userOperation == OperationMinus
+func (o *OperationMinus) Init(arguments ...float64) error {
+	if len(arguments) != 2 {
+		return fmt.Errorf("OperationMinus requires 2 arguments")
+	}
+
+	o.x = arguments[0]
+	o.y = arguments[1]
+	return nil
 }
 
-func (op *Minus) Do() (float64, error) {
-	return op.x - op.y, nil
+func (o *OperationMinus) Match(opType OperationType) bool {
+	return opType == OperationTypeMinus
 }

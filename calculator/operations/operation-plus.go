@@ -2,35 +2,30 @@ package operations
 
 import "fmt"
 
-type Plus struct {
+const OperationTypePlus OperationType = "+"
+
+type OperationPlus struct {
 	x, y float64
-
-	setupErr error
 }
 
-func NewPlus() *Plus {
-	return &Plus{}
+func NewOperationPlus() *OperationPlus {
+	return &OperationPlus{}
 }
 
-const OperationPlus = "+"
-
-func (op *Plus) Setup(operands ...float64) Operation {
-	if len(operands) < 2 {
-		op.setupErr = fmt.Errorf("invalid setup: inputs must be = 2")
-		return op
-	}
-	op.x, op.y = operands[0], operands[1]
-	return op
+func (o *OperationPlus) Calc() (float64, error) {
+	return o.x + o.y, nil
 }
 
-func (op *Plus) Match(userOperation string) bool {
-	return userOperation == OperationPlus
+func (o *OperationPlus) Match(opType OperationType) bool {
+	return opType == OperationTypePlus
 }
 
-func (op *Plus) Do() (float64, error) {
-	if op.setupErr != nil {
-		return 0, op.setupErr
+func (o *OperationPlus) Init(arguments ...float64) error {
+	if len(arguments) != 2 {
+		return fmt.Errorf("OperationPlus requires 2 arguments")
 	}
 
-	return op.x + op.y, nil
+	o.x = arguments[0]
+	o.y = arguments[1]
+	return nil
 }
